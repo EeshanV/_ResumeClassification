@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="data:,">
+    <title>Send Email</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+        }
+        .logo {
+            position: fixed;
+            right: 10px;
+            bottom: 20px;
+            width: 80px;
+        }
+
+        .copyright {
+            position: fixed;
+            right: 20px;
+            bottom: 5px;
+            font-size: 15px;
+            color: #888888;
+        }
+        .navbar {
+            background-color: #1f1f1f;
+            color: white;
+            transition: background-color 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand,
+        .nav-link {
+            color: white !important;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        
+        .navbar:hover {
+            background-color: #141414;
+        }
+        
+        .navbar .navbar-brand:hover,
+        .navbar .nav-link:hover {
+            color: #ffffff !important;
+        }
+        
+        .container {
+            margin-top: 80px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            color: #1f1f1f;
+            margin-bottom: 30px;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #1f1f1f;
+            color: white;
+        }
+        
+        a {
+            text-decoration: none;
+            color: #1f1f1f;
+            transition: color 0.3s;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .scrollable-table {
+            overflow-x: auto;
+        }
+        
+        .skills-container {
+            max-height: 7em;
+            overflow-y: auto;
+        }
+        
+        .skills-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        
+        .skill {
+            display: inline-block;
+            padding: 3px 6px;
+            font-size: 12px;
+            background-color: #f2f2f2;
+            border-radius: 3px;
+        }
+        
+        .btn {
+            background-color: #1f1f1f;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .btn-browse {
+            background-color: #1f1f1f;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .btn-browse:hover {
+            background-color: #363636;
+            transform: scale(1.05);
+        }
+        
+        .btn-browse-label {
+            display: inline-block;
+            background-color: #1f1f1f;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .btn-browse-label:hover {
+            background-color: #363636;
+            transform: scale(1.05);
+        }
+
+        .btn:hover {
+            background-color: #363636;
+            transform: scale(1.05);
+        }
+        
+        .btn-lightbox {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .btn-lightbox:hover {
+            background-color: rgba(255, 255, 255, 0.95);
+            transform: scale(1.02);
+        }
+        
+        .btn-slide {
+            transition: transform 0.3s;
+        }
+        
+        .btn-slide:hover {
+            transform: translateX(10px);
+        }
+        
+        .email-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        label {
+            font-weight: bold;
+        }
+
+    </style>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/">Dashboard</a>
+        <div class="navbar-nav">
+            <a class="nav-link btn" href="/upload">Upload</a>
+            <a class="nav-link btn" href="/convert">Extract</a>
+            <a class="nav-link btn" href="/searchresume">Search</a>
+            <a class="nav-link btn" href="/view">View</a>
+        </div>
+        <div class="navbar-nav ml-auto">
+            <a class="nav-link" href="/" onclick="confirmClear()">Clear</a>
+            <a class="nav-link" href="/logout">Logout</a>
+        </div>
+    </nav>
+    <div class="container mt-4">
+        <h1>Send Email</h1>
+        <div class="mt-4">
+        <label>From:    </label>
+        <div class="email-list">{{ from_email }}</div>
+        </div>
+        <div class="mt-4">
+        <label >TO: </label> 
+        <div class="email-list">{{ to_email }}</div>
+    </div>
+    <div class="mt-4">
+        <form method="POST" action="/mail">
+            <label for="subject" style="font-weight: bold;">Subject:</label><br>
+            <input type="text" class="form-control" id="subject" name="subject"><br>
+            <label for="message">Message:</label><br>
+            <textarea id="message" class="form-control" name="message"></textarea><br>
+            <input type="submit" value="Send Email" class="btn-browse">
+        </form>
+    {{ done }}   
+    </div>
+            </div>
+
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+</body>
+</html>

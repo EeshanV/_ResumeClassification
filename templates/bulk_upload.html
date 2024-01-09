@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="data:,">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+        }
+        .logo {
+            position: fixed;
+            right: 10px;
+            bottom: 20px;
+            width: 80px;
+        }
+
+        .copyright {
+            position: fixed;
+            right: 20px;
+            bottom: 5px;
+            font-size: 12px;
+            color: #888888;
+        }
+        .navbar {
+            background-color: #1f1f1f;
+            color: white;
+            transition: background-color 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand,
+        .nav-link {
+            color: white !important;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        
+        .navbar:hover {
+            background-color: #141414;
+        }
+        
+        .navbar .navbar-brand:hover,
+        .navbar .nav-link:hover {
+            color: #ffffff !important;
+        }
+        
+        .container {
+            margin-top: 80px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            color: #1f1f1f;
+            margin-bottom: 30px;
+        }
+        
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        input[type="file"] {
+            opacity: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+        
+        .btn-browse {
+            background-color: #1f1f1f;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .btn-browse:hover {
+            background-color: #363636;
+            transform: scale(1.05);
+        }
+        
+        .btn-browse-label {
+            display: inline-block;
+            background-color: #1f1f1f;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .btn-browse-label:hover {
+            background-color: #363636;
+            transform: scale(1.05);
+        }
+
+        
+        
+        #uploadMessage {
+            display: none;
+            color: green;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/">Dashboard</a>
+        <div class="navbar-nav">
+            <a class="nav-link btn" href="/upload">Upload</a>
+            <a class="nav-link btn" href="/convert">Extract</a>
+            <a class="nav-link btn" href="/searchresume">Search</a>
+            <a class="nav-link btn" href="/view">View</a>
+        </div>
+        <div class="navbar-nav ml-auto">
+            <a class="nav-link" href="/logout">Logout</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <h1>Bulk Upload</h1>
+        <form id="bulkUploadForm" action="/bulk_upload" method="post" enctype="multipart/form-data">
+            <label for="bulkUploadInput" class="btn-browse-label">Browse Files</label>
+            <input id="bulkUploadInput" type="file" name="files[]" multiple accept=".pdf,.docx">
+            <input type="submit" value="Upload" class="btn-browse">
+        </form>
+        <p id="uploadMessage">All files uploaded successfully!</p>
+    </div>
+
+    <img src="static/logo.png" alt="Logo" class="logo">
+    <div class="copyright">
+        &copy; PalmTree Analytics 2023
+    </div>
+
+    <script>
+        document.getElementById('bulkUploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+    
+            var files = Array.from(document.getElementById('bulkUploadInput').files);
+    
+            if (files.length === 0) {
+                alert('Please select at least one file to upload.');
+                return;
+            }
+    
+            var formData = new FormData();
+            files.forEach(function(file) {
+                formData.append('files[]', file);
+            });
+    
+            var xhr = new XMLHttpRequest();
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        var response = xhr.responseText;
+                        if (response === 'Files saved successfully!') {
+                            console.log('Files saved successfully!');
+                            document.getElementById('uploadMessage').style.display = 'block';
+                        } else {
+                            alert(response);
+                        }
+                    } else {
+                        console.error('Failed to save the files.');
+                        alert('Error occurred while uploading files.');
+                    }
+                }
+            };
+            xhr.open('POST', '/bulk_upload', true);
+            xhr.send(formData);
+        });
+    </script>
+    
+</body>
+</html>

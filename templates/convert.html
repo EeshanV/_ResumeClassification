@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="data:,">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+        }
+        .logo {
+            position: fixed;
+            right: 10px;
+            bottom: 20px;
+            width: 80px;
+        }
+
+        .copyright {
+            position: fixed;
+            right: 20px;
+            bottom: 5px;
+            font-size: 12px;
+            color: #888888;
+        }
+        .navbar {
+            background-color: #1f1f1f;
+            color: white;
+            transition: background-color 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar-brand,
+        .nav-link {
+            color: white !important;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        
+        .navbar:hover {
+            background-color: #141414;
+        }
+        
+        .navbar .navbar-brand:hover,
+        .navbar .nav-link:hover {
+            color: #ffffff !important;
+        }
+        
+        .container {
+            margin-top: 80px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            color: #1f1f1f;
+            margin-top: 30%;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th,
+        td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background-color: #1f1f1f;
+            color: white;
+        }
+        
+        a {
+            text-decoration: none;
+            color: #1f1f1f;
+            transition: color 0.3s;
+        }
+        
+        a:hover {
+            text-decoration: underline;
+        }
+        
+        .scrollable-table {
+            overflow-x: auto;
+        }
+        
+        .skills-container {
+            max-height: 7em;
+            overflow-y: auto;
+        }
+        
+        .skills-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+        
+        .skill {
+            display: inline-block;
+            padding: 3px 6px;
+            font-size: 12px;
+            background-color: #f2f2f2;
+            border-radius: 3px;
+        }
+        
+        .btn {
+            background-color: #1f1f1f;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .btn:hover {
+            background-color: #363636;
+            transform: scale(1.05);
+        }
+        
+        .btn-lightbox {
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .btn-lightbox:hover {
+            background-color: rgba(255, 255, 255, 0.95);
+            transform: scale(1.02);
+        }
+        
+        .btn-slide {
+            transition: transform 0.3s;
+        }
+        
+        .btn-slide:hover {
+            transform: translateX(10px);
+        }
+
+        .upload-form {
+            text-align: center;
+        }
+
+        .upload-form form {
+            margin-bottom: 20px;
+        }
+        
+        .upload-form input[type="submit"] {
+        background-color: #1f1f1f;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        transition: background-color 0.3s, transform 0.3s;
+        cursor: pointer;
+        font-size: 16px;
+        font-weight: bold;
+        width: 150px; /* Adjust the width as desired */
+        box-sizing: border-box;
+        display: inline-block;
+    }
+        
+        .upload-form input[type="submit"]:hover {
+            background-color: #363636;
+            transform: scale(1.05);
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+        }
+        
+        .loader {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Style to make everything else unclickable */
+        body.loading {
+            pointer-events: none;
+        }
+    </style>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/">Dashboard</a>
+        <div class="navbar-nav">
+            <a class="nav-link btn" href="/upload">Upload</a>
+            <a class="nav-link btn" href="/convert">Extract</a>
+            <a class="nav-link btn" href="/searchresume">Search</a>
+            <a class="nav-link btn" href="/view">View</a>
+        </div>
+        <div class="navbar-nav ml-auto">
+            <a class="nav-link" href="/logout">Logout</a>
+        </div>
+    </nav>
+    <br>
+    <br>
+    {% if error_message %}
+        <p style="color: red;">{{ error_message }}</p>
+    {% endif %}
+    <div class="loading-overlay" id="loading-overlay" style="display: none;">
+        <div class="loader"></div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 offset-md-3 upload-form">
+                <h1>Extract</h1>
+                <form method="post" onsubmit="showLoader()">
+                    <input type="submit" value="Extract Files">
+                </form>
+                <div id="done-message">
+                    {% if done %}
+                        <p style="color: green;">{{ done }}</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <img src="static/logo.png" alt="Logo" class="logo">
+    <div class="copyright">
+        &copy; PalmTree Analytics 2023
+    </div>
+
+    <script>
+        function showLoader() {
+            var loadingOverlay = document.getElementById("loading-overlay");
+            loadingOverlay.style.display = "flex";
+            document.body.classList.add("loading");
+        }
+    </script>
+</script>
+</body>
+</html>

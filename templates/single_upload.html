@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="icon" href="data:,">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+        }
+        
+        .navbar {
+            background-color: #1f1f1f;
+            color: white;
+            transition: background-color 0.3s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .logo {
+            position: fixed;
+            right: 10px;
+            bottom: 20px;
+            width: 80px;
+        }
+
+        .copyright {
+            position: fixed;
+            right: 20px;
+            bottom: 5px;
+            font-size: 12px;
+            color: #888888;
+        }
+        .navbar-brand,
+        .nav-link {
+            color: white !important;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        
+        .navbar:hover {
+            background-color: #141414;
+        }
+        
+        .navbar .navbar-brand:hover,
+        .navbar .nav-link:hover {
+            color: #ffffff !important;
+        }
+        
+        .container {
+            margin-top: 80px;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 36px;
+            color: #1f1f1f;
+            margin-bottom: 30px;
+        }
+        
+        form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        
+        input[type="file"] {
+            opacity: 0;
+            position: absolute;
+            pointer-events: none;
+        }
+        
+        .btn-browse {
+            background-color: #1f1f1f;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .btn-browse:hover {
+            background-color: #363636;
+            transform: scale(1.05);
+        }
+        
+        .btn-browse-label {
+            display: inline-block;
+            background-color: #1f1f1f;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            transition: background-color 0.3s, transform 0.3s;
+            cursor: pointer;
+        }
+        
+        .btn-browse-label:hover {
+            background-color: #363636;
+            transform: scale(1.05);
+        }
+
+        
+        
+        #uploadMessage {
+            display: none;
+            color: green;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+</style>
+    </style>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.5.1/mammoth.browser.min.js" integrity="sha512-GXQyA7vCy/AVkekAX69TNpeV1QQu1m+K5Dhx38qyccm27y8nRDjUozszUdmGVnP/j7w9X5VEBmrXGaBZAORXgg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="/">Dashboard</a>
+        <div class="navbar-nav">
+            <a class="nav-link btn" href="/upload">Upload</a>
+            <a class="nav-link btn" href="/convert">Extract</a>
+            <a class="nav-link btn" href="/searchresume">Search</a>
+            <a class="nav-link btn" href="/view">View</a>
+        </div>
+        <div class="navbar-nav ml-auto">
+            <a class="nav-link" href="/logout">Logout</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+                <h1>Single Upload</h1>
+                    <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+                        <label for="uploadInput" class="btn-browse-label">Browse Files</label>
+                        <input id="uploadInput" style="visibility: hidden;" type="file" name="resume" accept=".pdf,.docx">
+                        <input type="submit" value="Upload" class="btn-browse">
+                    </form>
+
+            </div>
+        </div>
+            <div class="col" style="margin-top: 20px;">
+                <div id="resumeViewer"></div>
+            </div>
+        </div>
+    </div>
+
+    <img src="static/logo.png" alt="Logo" class="logo">
+    <div class="copyright">
+        &copy; PalmTree Analytics 2023
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            var file = document.getElementById('uploadInput').files[0];
+
+            if (file.type === 'application/pdf') {
+                renderPDF(file);
+                saveFileToServer(file);
+            } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+                renderDOCX(file);
+                saveFileToServer(file);
+            } else {
+                alert('Unsupported file format. Please upload a PDF or DOCX file.');
+            }
+        });
+
+        function renderPDF(file) {
+            var fileURL = URL.createObjectURL(file);
+            var embedHTML = '<embed src="' + fileURL + '" type="application/pdf" width="100%" height="500px" />';
+            document.getElementById('resumeViewer').innerHTML = embedHTML;
+        }
+
+        function renderDOCX(file) {
+            var reader = new FileReader();
+            reader.onload = function(event) {
+                var arrayBuffer = event.target.result;
+                var fileData = new Uint8Array(arrayBuffer);
+                var fileBlob = new Blob([fileData]);
+                var fileToRender = new File([fileBlob], file.name, {
+                    type: file.type
+                });
+
+                mammoth.convertToHtml({ arrayBuffer: fileToRender })
+                    .then(function(result) {
+                        var extractedText = result.value;
+                        document.getElementById('resumeViewer').innerHTML = extractedText;
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function saveFileToServer(file) {
+            var formData = new FormData();
+            formData.append('resume', file);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/single_upload', true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE) {
+                    if (xhr.status === 200) {
+                        console.log('File saved successfully!');
+                    } else {
+                        console.error('Failed to save the file.');
+                    }
+                }
+            };
+            xhr.send(formData);
+        }
+    </script>
+</body>
+</html>
